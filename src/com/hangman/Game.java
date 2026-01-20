@@ -75,7 +75,7 @@ public class Game {
         return isRight;
     }
 
-    public void guessWord() throws IOException {
+    public void guessWord() {
         while (MAX_NUMBER_OF_ATTEMPTS > 0 && randomWord.getHiddenWord().contains("*")) {
             System.out.println("Оставшееся число попыток " + MAX_NUMBER_OF_ATTEMPTS);
             System.out.println("Буквы которые вы ввели " + randomWord.getOpenLetters());
