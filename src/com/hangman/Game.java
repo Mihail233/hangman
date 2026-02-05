@@ -1,112 +1,111 @@
 package com.hangman;
 
-import java.io.IOException;
-import java.util.Scanner;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Game {
-    private PictureHangman pictureHangman;
-    private RandomWord randomWord;
-    private Scanner scanner;
-    private boolean stateGame = false;
-
-    private int MAX_NUMBER_OF_ATTEMPTS = 6;
+    private final static int MAX_NUMBER_OF_ATTEMPTS = 6;
+    private final UserAnswer userAnswer;
+    private final PictureHangman pictureHangman;
+    private final RandomWord randomWord;
+    private final SecretWord secretWord;
     private int roundNumber = 0;
+
+    public Game() {
+        Path pathToPicture = Paths.get("./src/resources/hangman.txt");
+        Path pathToWords = Paths.get("./src/resources/randomWord.txt");
+        this.userAnswer = new UserAnswer();
+        this.pictureHangman = new PictureHangman(pathToPicture);
+        this.randomWord = new RandomWord(pathToWords);
+        this.secretWord = new SecretWord(randomWord);
+    }
 
     public int getRoundNumber() {
         return roundNumber;
     }
 
-    public void setRoundNumber() {
+    public void incRoundNumber() {
         roundNumber++;
     }
 
-    public void startGame() throws IOException {
-        System.out.println("Желаете начать игру, введите S - начать, E - выйти");
-        getStateGame();
-        checkStateGame();
-    }
-
-    public void getStateGame() {
-        scanner = new Scanner(System.in);
-        while (true) {
-            String answer = getAnswer();
-            boolean isRight = checkAnswer(answer);
-            if (isRight) {
-                return;
-            }
-        }
-    }
-
-    public void checkStateGame() throws IOException {
-        if (!stateGame) {
-            System.exit(0);
-        } else {
-            pictureHangman = new PictureHangman();
-            randomWord = new RandomWord();
-        }
-    }
-
-    public String getAnswer() {
-        String answer;
-        while (true) {
-            answer = scanner.nextLine().toLowerCase();
-            int SIZE_ONE_LETTER = 1;
-            if (answer.length() == SIZE_ONE_LETTER) {
-                break;
-            }
-            System.out.println("Введите букву, а не enter или предложение");
-        }
-        return answer;
-    }
-
-    public boolean checkAnswer(String answer) {
-        boolean isRight = true;
-        switch (answer) {
-            case "s":
-                stateGame = true;
-                System.out.println("Начало игры");
-                break;
-            case "e":
-                break;
-            default:
-                isRight = false;
-                System.out.println("Введите снова");
-        }
-        return isRight;
-    }
-
-    public void guessWord() {
-        while (MAX_NUMBER_OF_ATTEMPTS > 0 && randomWord.getHiddenWord().contains("*")) {
-            System.out.println("Оставшееся число попыток " + MAX_NUMBER_OF_ATTEMPTS);
-            System.out.println("Буквы которые вы ввели " + randomWord.getOpenLetters());
+    public void start() {
+        System.out.printf("Вам загадали слово из %d букв\n", secretWord.getSecretText().length());
+        System.out.println(secretWord.getSecretText());
+        int leftAttempts;
+        while (!isOver()) {
+            leftAttempts = MAX_NUMBER_OF_ATTEMPTS - roundNumber;
+            System.out.printf("Оставшееся число попыток %d\n", leftAttempts);
+            System.out.printf("Буквы которые вы ввели %s\n", secretWord.getOpenLetters());
             System.out.println("Введите букву");
-            String letter = getAnswer();
-            if (randomWord.getOpenLetters().contains(letter)) {
-                System.out.println("Вы уже угадывали эту букву: " + letter);
+            Character letter = userAnswer.getAnswer();
+            if (secretWord.isOpenLetter(letter)) {
+                System.out.printf("Вы уже угадывали эту букву: %s\n", letter);
                 continue;
             }
-            boolean isFind = randomWord.checkLetter(letter);
-            randomWord.addOpenLetter(letter);
-            showResultOfOneTurn(isFind);
+            boolean isFind = secretWord.hasLetter(letter);
+            if (isFind) {
+                secretWord.openLettersInWord(letter);
+            }
+            secretWord.addOpenLetter(letter);
+            printResultOfOneTurn(isFind);
+            moveOnNextRound(isFind);
         }
+        printResultTheGame();
+    }
+
+    public boolean isOver() {
+        return isWin() || isLose();
+    }
+
+    public boolean isWin() {
+        return !secretWord.getSecretText().contains("*");
+    }
+
+    public boolean isLose() {
+        return MAX_NUMBER_OF_ATTEMPTS == (roundNumber);
     }
 
     public void printResultTheGame() {
-        if (MAX_NUMBER_OF_ATTEMPTS < 1) {
-            System.out.println("Вы проиграли, загаданное слово было " + randomWord.getRandomWord());
-        } else {
-            System.out.println("Вы выйграли, загаданное слово было " + randomWord.getRandomWord());
+        if (isLose()) {
+            System.out.printf("Вы проиграли, загаданное слово было %s\n", randomWord.getText());
+        } else if (isWin()) {
+            System.out.printf("Вы выйграли, загаданное слово было %s\n", randomWord.getText());
         }
     }
 
-    private void showResultOfOneTurn(boolean isFind) {
+    private void printResultOfOneTurn(boolean isFind) {
         if (!isFind) {
-            MAX_NUMBER_OF_ATTEMPTS--;
-            pictureHangman.writeHangman(this);
-            System.out.println("Буква не найдена ");
+            System.out.println("Буква не найдена");
+            printHangman();
         } else {
-            System.out.println("Откройте букву ");
-            System.out.println("Слово: " + randomWord.getHiddenWord());
+            System.out.println("Откройте букву");
+            System.out.printf("Слово: %s\n", secretWord.getSecretText());
+        }
+    }
+
+    private void moveOnNextRound(boolean isFind) {
+        if (!isFind) {
+            incRoundNumber();
+        }
+    }
+
+    public void printHangman() {
+        for (int indexRowPicture = 0; indexRowPicture < pictureHangman.getSize(); indexRowPicture++) {
+            String linePicture = pictureHangman.getLines().get(indexRowPicture);
+            List<String> rowPicture = new ArrayList<>(Arrays.asList(linePicture.split("")));
+            printPartOfHangman(rowPicture, indexRowPicture);
+            System.out.println();
+        }
+    }
+
+    public void printPartOfHangman(List<String> rowPicture, int indexRowPicture) {
+        for (int indexSymbol = 0; indexSymbol < rowPicture.size(); indexSymbol++) {
+            if (indexSymbol <= this.getRoundNumber() || indexRowPicture <= this.getRoundNumber()) {
+                System.out.print(rowPicture.get(indexSymbol));
+            }
         }
     }
 }

@@ -1,16 +1,14 @@
 import com.hangman.Game;
+import com.hangman.UserAnswer;
 
-void main() {
-    try {
+public class Main {
+    public static void main(String[] args) {
+        UserAnswer userAnswer = new UserAnswer();
         while (true) {
-            Game game = new Game();
-            game.startGame();
-            game.guessWord();
-            game.printResultTheGame();
+            if (userAnswer.isWantToStartGame()) {
+                Game game = new Game();
+                game.start();
+            }
         }
-    } catch (IOException err) {
-        System.out.println("Возникла ошибка " + err);
-    } finally {
-        System.out.println("Игра завершилась");
     }
 }
