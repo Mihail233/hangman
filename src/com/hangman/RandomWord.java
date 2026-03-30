@@ -3,36 +3,38 @@ package com.hangman;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class RandomWord {
-    private final String text;
+    private final static Path PATH_TO_WORDS = Paths.get("./src/resources/randomWord.txt");
+    private String text;
     private List<String> words;
 
-    public RandomWord(Path pathToWords) {
-        readWordsFromFile(pathToWords);
-        this.text = chooseRandomWord();
+    public RandomWord() {
+        readWordsFromFile();
+        chooseRandomWord();
     }
 
     public String getText() {
         return text;
     }
 
-    public Character getLetterFromWord(int index) {
-        return this.getText().charAt(index);
-    }
-
-    public void readWordsFromFile(Path pathToWords) {
+    private void readWordsFromFile() {
         try {
-            this.words = Files.readAllLines(pathToWords);
+            this.words = Files.readAllLines(RandomWord.PATH_TO_WORDS);
         } catch (IOException e) {
-            throw new FileReadingError(String.format("Проблема с файлом %s", pathToWords));
+            throw new FileReadingError(String.format("Проблема с файлом %s", RandomWord.PATH_TO_WORDS));
         }
     }
 
-    private String chooseRandomWord() {
+    private void chooseRandomWord() {
         assert words != null;
         int randomIndex = (int) (Math.random() * words.size());
-        return words.get(randomIndex).toUpperCase();
+        this.text = words.get(randomIndex).toUpperCase();
+    }
+
+    public Character getLetterFromWord(int index) {
+        return this.getText().charAt(index);
     }
 }

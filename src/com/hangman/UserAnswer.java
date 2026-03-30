@@ -11,7 +11,7 @@ public class UserAnswer {
     public boolean isWantToStartGame() {
         System.out.printf("Желаете начать игру, введите %s - начать, %s - выйти\n", START, EXIT);
         while (true) {
-            Character letter = getAnswer();
+            Character letter = getLetterFromUser();
             if (isExitFromGame(letter)) {
                 System.out.println("Игры была завершена");
                 System.exit(0);
@@ -24,9 +24,10 @@ public class UserAnswer {
         }
     }
 
-    public Character getAnswer() {
+    public Character getLetterFromUser() {
         String answer;
         while (true) {
+            System.out.println("Введите букву");
             answer = SCANNER.nextLine().toUpperCase();
             if (isLetter(answer)) {
                 Character letter = answer.charAt(0);
@@ -38,19 +39,19 @@ public class UserAnswer {
         }
     }
 
-    public boolean isLetter(String answer) {
+    private boolean isLetter(String answer) {
         return answer.length() == LENGTH_ONE_LETTER;
     }
 
-    public boolean isLocatedInTheAlphabet(Character letter) {
+    private boolean isLocatedInTheAlphabet(Character letter) {
         return letter >= 'А' && letter <= 'Я' || letter.equals('Ё');
     }
 
-    public boolean isExitFromGame(Character letter) {
+    private boolean isExitFromGame(Character letter) {
         return letter.equals(EXIT);
     }
 
-    public boolean isStartGame(Character letter) {
+    private boolean isStartGame(Character letter) {
         return letter.equals(START);
     }
 }

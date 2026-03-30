@@ -3,13 +3,16 @@ package com.hangman;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class PictureHangman {
+    private final static Path PATH_TO_PICTURE = Paths.get("./src/resources/hangman.txt");
+
     private List<String> lines;
 
-    public PictureHangman(Path pathToHangman) {
-        readHangmanPictureFromFile(pathToHangman);
+    public PictureHangman() {
+        readHangmanPictureFromFile();
     }
 
     public int getSize() {
@@ -19,11 +22,11 @@ public class PictureHangman {
         return lines;
     }
 
-    public void readHangmanPictureFromFile(Path pathToPicture) {
+    private void readHangmanPictureFromFile() {
         try {
-            this.lines = Files.readAllLines(pathToPicture);
+            this.lines = Files.readAllLines(PictureHangman.PATH_TO_PICTURE);
         } catch (IOException e) {
-            throw new FileReadingError(String.format("Проблема с файлом %s", pathToPicture));
+            throw new FileReadingError(String.format("Проблема с файлом %s", PictureHangman.PATH_TO_PICTURE));
         }
     }
 }

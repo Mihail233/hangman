@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SecretWord {
+    private final RandomWord randomWord;
     private final List<Character> openLetters = new ArrayList<>();
     private String secretText;
-    private final RandomWord randomWord;
 
     public SecretWord(RandomWord randomWord) {
         this.randomWord = randomWord;
@@ -15,6 +15,10 @@ public class SecretWord {
 
     public String getSecretText() {
         return secretText;
+    }
+
+    public RandomWord getRandomWord() {
+        return randomWord;
     }
 
     private void setSecretText(RandomWord randomWord) {
