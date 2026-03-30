@@ -36,8 +36,7 @@ public class Game {
             }
             secretWord.addOpenLetter(letter);
 
-            boolean hasLetter = secretWord.hasLetter(letter);
-            finishTurn(letter, hasLetter);
+            finishTurn(letter);
         }
         printResultTheGame();
     }
@@ -60,8 +59,9 @@ public class Game {
         System.out.printf("Буквы которые вы ввели %s\n", secretWord.getOpenLetters());
     }
 
-    private void finishTurn(Character letter, boolean isFind) {
-        if (isFind) {
+    private void finishTurn(Character letter) {
+        boolean hasLetter = secretWord.hasLetter(letter);
+        if (hasLetter) {
             secretWord.openLettersInWord(letter);
             System.out.println("Откройте букву");
             System.out.printf("Слово: %s\n", secretWord.getSecretText());
